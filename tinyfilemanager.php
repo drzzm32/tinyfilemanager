@@ -26,9 +26,16 @@ $use_auth = true;
 // Users: array('Username' => 'Password', 'Username2' => 'Password2', ...)
 // Generate secure password hash - https://tinyfilemanager.github.io/docs/pwd.html
 $auth_users = array(
-    'admin' => '$2y$10$/K.hjNr84lLNDt8fTXjoI.DBp6PpeyoJ.mGwrrLuCZfAwfSAGqhOW', //admin@123
-    'user' => '$2y$10$Fg6Dz8oH9fPoZ2jJan5tZuv6Z4Kp7avtQ9bDfrdRntXtPeiMAZyGO' //12345
+    'admin' => password_hash('admin', PASSWORD_DEFAULT),
+    'user' => password_hash('12345', PASSWORD_DEFAULT)
 );
+
+/* ---------------- Modified ---------------- */
+// Admin users
+$admin_users = array(
+    'admin'
+);
+/* ---------------- Modified ---------------- */
 
 // Readonly users 
 // e.g. array('users', 'guest', ...)
@@ -86,7 +93,10 @@ $favicon_path = '?img=favicon';
 
 // Files and folders to excluded from listing
 // e.g. array('myfile.html', 'personal-folder', '*.php', ...)
-$exclude_items = array();
+$exclude_items = array(
+    'translation.json',
+    '*.php'
+);
 
 // Online office Docs Viewer
 // Availabe rules are 'google', 'microsoft' or false
@@ -354,6 +364,10 @@ defined('FM_EXCLUDE_ITEMS') || define('FM_EXCLUDE_ITEMS', $exclude_items);
 defined('FM_DOC_VIEWER') || define('FM_DOC_VIEWER', $online_viewer);
 define('FM_READONLY', $use_auth && !empty($readonly_users) && isset($_SESSION[FM_SESSION_ID]['logged']) && in_array($_SESSION[FM_SESSION_ID]['logged'], $readonly_users));
 define('FM_IS_WIN', DIRECTORY_SEPARATOR == '\\');
+
+/* ---------------- Modified ---------------- */
+define('FM_IS_ADMIN', $use_auth && !empty($admin_users) && isset($_SESSION[FM_SESSION_ID]['logged']) && in_array($_SESSION[FM_SESSION_ID]['logged'], $admin_users));
+/* ---------------- Modified ---------------- */
 
 // always use ?p=
 if (!isset($_GET['p']) && empty($_FILES)) {
@@ -2314,6 +2328,9 @@ function fm_get_parent_path($path)
  * @return bool
  */
 function fm_is_exclude_items($file) {
+/* ---------------- Modified ---------------- */
+    if (FM_IS_ADMIN) return true;
+/* ---------------- Modified ---------------- */
     $ext = strtolower(pathinfo($file, PATHINFO_EXTENSION));
     if(!in_array($file, FM_EXCLUDE_ITEMS) && !in_array("*.$ext", FM_EXCLUDE_ITEMS)) {
         return true;
